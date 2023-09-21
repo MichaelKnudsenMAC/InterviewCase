@@ -16,11 +16,36 @@ namespace MachineMonitoring
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            SeedMachines();
             SeedOrders();
             
             while (stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(60000);
+            }
+        }
+
+        private void SeedMachines()
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                _context = scope.ServiceProvider.GetRequiredService<MachineMonitoringDbContext>();
+
+                int machineCount = _context.Machines.Count();
+
+                if (machineCount == 0)
+                {
+                    List<string> workCenters = new List<string>() { "140491", "140494", "150370", "150372", "195930", "227430", "267838", "153576" };
+
+                    foreach (var machine in workCenters)
+                    {
+                        Machine newMachine = new Machine() { WorkcenterId = machine, CurrentMachineState = EventContracts.Enums.DeviceState.Running };    
+                        _context.Machines.Add(newMachine);
+                    }
+
+
+                    _context.SaveChanges();
+                }
             }
         }
 
@@ -37,7 +62,6 @@ namespace MachineMonitoring
                     foreach (var machine in _context.Machines)
                     {
                         SeedOrderBacklog(machine);
-
                     }
 
                     _context.SaveChanges();
@@ -61,6 +85,8 @@ namespace MachineMonitoring
                 _context.Entry(newOrder).State = EntityState.Added;                
                 machine.OrderBacklog.Add(newOrder);
             }
+
+            machine.OrderCurrent = rand.Next(100000, 999999).ToString();
         }
     }
 }
