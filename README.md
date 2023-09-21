@@ -12,7 +12,7 @@
 
 ## Good to know
 
-MachineMonitoring uses an Azure SQL database, which you should not be able to access, so if you want to run the code please let me know so i can grant access to your IP adresse
+MachineMonitoring uses an SQL database. I used an Azure SQL database, but you should be able to add you own connection string in the appsettings file, or i can help setup access to the database i used where data is already seeded.
 Other than this there is not given any consideration to security. 
 
 ## Design choices
